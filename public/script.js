@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const assignmentForm = document.getElementById('assignmentForm');
     const classForm = document.getElementById('classForm');
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://assignment-app.phi.vercel.app';
+    const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://assignment-app-phi.vercel.app';
 
     function toggleFields() {
         const role = document.getElementById('role')?.value;
