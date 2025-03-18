@@ -77,6 +77,13 @@ const submissionSchema = new mongoose.Schema({
 const Submission = mongoose.model('Submission', submissionSchema);
 
 // Routes
+
+
+
+app.get('/test', (req, res) => {
+    console.log('Test route hit');
+    res.send('Server is up!');
+  });
 app.post('/api/signup', async (req, res) => {
     const { username, password, studentID, role, classId } = req.body;
     try {
