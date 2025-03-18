@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const assignmentForm = document.getElementById('assignmentForm');
     const classForm = document.getElementById('classForm');
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://assignment-app-phi.vercel.app';
+    const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://assignment-app-omega.vercel.app';
 
     function toggleFields() {
         const role = document.getElementById('role')?.value;
@@ -247,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Teacher Dashboard
     if (classForm || assignmentForm) {
         if (!currentUser || currentUser.role !== 'teacher') {
             window.location.href = 'index.html';
@@ -376,7 +375,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Class Assignments Page
     if (document.getElementById('className') && window.location.pathname.includes('class-assignments.html')) {
         if (!currentUser || currentUser.role !== 'teacher') {
             window.location.href = 'index.html';
@@ -465,7 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Assignment Detail Page
     if (document.getElementById('assignmentTopic')) {
         if (!currentUser || currentUser.role !== 'teacher') {
             window.location.href = 'index.html';
@@ -536,7 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Helper functions
 function loadAssignments(classId) {
     window.location.href = `class-assignments.html?classId=${classId}`;
 }
@@ -546,5 +542,5 @@ function viewSubmissions(assignmentId) {
 }
 
 function downloadSubmissions(assignmentId) {
-    window.location.href = `${window.location.hostname === 'localhost' ? 'http://localhost:3000' : ''}/api/download-submissions/${assignmentId}`;
+    window.location.href = `${window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://assignment-app-omega.vercel.app'}/api/download-submissions/${assignmentId}`;
 }

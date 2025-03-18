@@ -11,13 +11,16 @@ const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/assignmentDB';
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+    console.log('Request:', req.method, req.url, req.body);
+    next();
+});
 
 // Cloudinary configuration
 cloudinary.config({
@@ -26,19 +29,15 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Basic Multer storage
+// Multer setup
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Middleware to log request body
-app.use((req, res, next) => {
-    console.log('Request body before route:', req.body);
-    next();
-});
-
+// MongoDB connection
+console.log('Starting server...');
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB!'))
-  .catch(err => console.error('MongoDB connection error:', err.message));
+    .then(() => console.log('Connected to MongoDB!'))
+    .catch(err => console.error('MongoDB connection error:', err.message));
 
 // Schemas
 const userSchema = new mongoose.Schema({
@@ -77,16 +76,15 @@ const submissionSchema = new mongoose.Schema({
 const Submission = mongoose.model('Submission', submissionSchema);
 
 // Routes
-
-
-
 app.get('/test', (req, res) => {
     console.log('Test route hit');
     res.send('Server is up!');
-  });
+});
+
 app.post('/api/signup', async (req, res) => {
     const { username, password, studentID, role, classId } = req.body;
     try {
+        console.log('Signup attempt:', { username, role });
         const existingUser = await User.findOne({ username });
         if (existingUser) return res.status(400).json({ message: 'Username already taken' });
 
@@ -240,11 +238,10 @@ app.get('/api/assignments', async (req, res) => {
 
 app.post('/api/submit', upload.single('assignmentFile'), async (req, res) => {
     console.log('Incoming request body:', req.body);
-    console.log('Incoming file (before upload):', req.file);
+    console.log('Incoming file:', req.file);
 
     const { studentID, username, assignmentId, classId } = req.body;
 
-    // Validate required fields
     if (!studentID || !username || !assignmentId || !classId) {
         return res.status(400).json({ message: 'Missing required fields: studentID, username, assignmentId, or classId' });
     }
@@ -255,32 +252,24 @@ app.post('/api/submit', upload.single('assignmentFile'), async (req, res) => {
         return res.status(400).json({ message: 'Invalid classId' });
     }
 
-    // Check deadline
     const assignment = await Assignment.findById(assignmentId);
     if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
     if (new Date() > new Date(assignment.deadline)) {
         return res.status(400).json({ message: 'Deadline has passed; submission not allowed' });
     }
 
-    // Fetch class and assignment details
     const classObj = await Class.findById(classId);
     const classFolder = classObj ? `${classObj.name}(${classObj.code})` : 'unknown';
     const assignmentFolder = assignment.topic || 'unknown';
-
-    // Sanitize and trim folder names
     const sanitize = (str) => str.trim().replace(/[^a-zA-Z0-9-_() ]/g, '_');
     const folder = `assignments/${sanitize(classFolder)}/${sanitize(assignmentFolder)}`;
-    const publicId = `${folder}/${studentID}`;
 
-    // Check file presence
     if (!req.file || !req.file.buffer) {
-        console.error('No file buffer found:', req.file);
         return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Upload to Cloudinary with Promise
     try {
-        const uploadPromise = new Promise((resolve, reject) => {
+        const uploadResult = await new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
                 {
                     folder: folder,
@@ -297,48 +286,28 @@ app.post('/api/submit', upload.single('assignmentFile'), async (req, res) => {
             stream.end(req.file.buffer);
         });
 
-        const uploadResult = await uploadPromise;
-        console.log('Cloudinary upload result:', uploadResult);
+        const filePath = uploadResult.secure_url;
 
-        // Generate signed URL
-        const filePath = cloudinary.url(`${folder}/${studentID}.pdf`, {
-            resource_type: 'raw',
-            sign_url: true,
-            secure: true,
-            expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24-hour expiration
-        });
-        if (!filePath) {
-            throw new Error('Failed to generate signed URL');
-        }
-        console.log('Signed file path:', filePath);
-
-        // Save submission
         let submission = await Submission.findOne({ studentID, assignmentId });
         if (submission) {
             submission.filePath = filePath;
             submission.date = new Date();
             await submission.save();
-            console.log('Updated submission:', submission);
             res.json({ message: 'Submission updated' });
         } else {
             submission = new Submission({ studentID, username, assignmentId, filePath });
             await submission.save();
-            console.log('New submission:', submission);
             res.json({ message: 'Assignment submitted' });
         }
     } catch (error) {
         console.error('Submission error:', error);
         res.status(500).json({ message: 'Server error', details: error.message });
     }
-}, (err, req, res, next) => {
-    console.error('Multer error:', err);
-    res.status(500).json({ message: 'File upload error', details: err.message });
 });
 
 app.get('/api/submissions/student/:username', async (req, res) => {
     try {
         const submissions = await Submission.find({ username: req.params.username }).populate('assignmentId');
-        console.log('Submissions for student:', submissions);
         res.json(submissions);
     } catch (error) {
         console.error('Get student submissions error:', error);
@@ -352,7 +321,6 @@ app.get('/api/submissions/assignment/:assignmentId', async (req, res) => {
             return res.status(400).json({ message: 'Invalid assignmentId' });
         }
         const submissions = await Submission.find({ assignmentId: req.params.assignmentId }).populate('assignmentId');
-        console.log('Submissions for assignment:', submissions);
         res.json(submissions);
     } catch (error) {
         console.error('Get assignment submissions error:', error);
@@ -368,7 +336,6 @@ app.get('/api/download-submissions/:assignmentId', async (req, res) => {
         }
 
         const submissions = await Submission.find({ assignmentId }).populate('assignmentId');
-        console.log('Submissions for download:', submissions);
         if (submissions.length === 0) {
             return res.status(404).json({ message: 'No submissions found for this assignment' });
         }
@@ -379,18 +346,10 @@ app.get('/api/download-submissions/:assignmentId', async (req, res) => {
 
         for (const sub of submissions) {
             const fileUrl = sub.filePath;
-            if (!fileUrl) {
-                console.warn(`Skipping submission for ${sub.username} (ID: ${sub.studentID}) - filePath is undefined`);
-                continue;
-            }
-            console.log(`Downloading file: ${fileUrl}`);
+            if (!fileUrl) continue;
             const fileName = `${sub.studentID}.pdf`;
-            try {
-                const response = await axios.get(fileUrl, { responseType: 'stream' });
-                archive.append(response.data, { name: fileName });
-            } catch (downloadError) {
-                console.error(`Failed to download ${fileUrl}:`, downloadError.message);
-            }
+            const response = await axios.get(fileUrl, { responseType: 'stream' });
+            archive.append(response.data, { name: fileName });
         }
 
         archive.finalize();
@@ -400,6 +359,5 @@ app.get('/api/download-submissions/:assignmentId', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Export for Vercel
+module.exports = app;
