@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="student.html">Dashboard</a>
+        <a href="index.html" id="logout">Logout</a>
+    </nav>
+    <div class="container">
+        <h1>Student Dashboard</h1>
+        <p>Welcome, <span id="studentName"></span>! (Class: <span id="className"></span>)</p>
+        
+        <h2>Assignments</h2>
+        <div id="assignmentList"></div>
+
+        <h2>Your Submissions</h2>
+        <div id="submissionList" class="submission-list"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

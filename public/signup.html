@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="signup.html">Signup</a>
+    </nav>
+    <div class="container">
+        <h1>Signup</h1>
+        <form id="signupForm">
+            <label for="newUsername">Username:</label>
+            <input type="text" id="newUsername" required>
+            <label for="newPassword">Password:</label>
+            <input type="password" id="newPassword" required>
+            <label for="role">Role:</label>
+            <select id="role" required>
+                <option value="">Select a role</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+            <div id="studentFields" style="display: none;">
+                <label for="studentID">Student ID:</label>
+                <input type="text" id="studentID">
+                <label for="classId">Class:</label>
+                <select id="classId"></select>
+            </div>
+            <button type="submit">Signup</button>
+        </form>
+        <p id="signupStatus"></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

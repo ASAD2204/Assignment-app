@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Submissions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="teacher.html">Back to Dashboard</a>
+        <a href="#" id="logout">Logout</a>
+    </nav>
+    <div class="container">
+        <h1>Submissions for <span id="assignmentTopic"></span></h1>
+        <p>Deadline: <span id="assignmentDeadline"></span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Student ID</th>
+                    <th>File</th>
+                    <th>Submitted On</th>
+                </tr>
+            </thead>
+            <tbody id="submissionList"></tbody>
+        </table>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

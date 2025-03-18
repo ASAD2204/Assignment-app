@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="#" id="logout">Logout</a>
+    </nav>
+    <div class="container">
+        <h1>Teacher Dashboard</h1>
+        <h2>Create Class</h2>
+        <form id="classForm">
+            <label for="className">Class Name:</label>
+            <input type="text" id="className" required>
+            <label for="classCode">Course Code:</label>
+            <input type="text" id="classCode" required placeholder="e.g., CS101">
+            <button type="submit">Create Class</button>
+        </form>
+        <p id="classStatus"></p>
+
+        <h2>Your Classes</h2>
+        <div id="classList"></div>
+
+        <h2>Create Assignment</h2>
+        <form id="assignmentForm">
+            <label for="classId">Class:</label>
+            <select id="classId" required></select>
+            <label for="topic">Topic:</label>
+            <input type="text" id="topic" required>
+            <label for="deadline">Deadline:</label>
+            <input type="datetime-local" id="deadline" required>
+            <button type="submit">Create Assignment</button>
+        </form>
+        <p id="assignmentStatus"></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
